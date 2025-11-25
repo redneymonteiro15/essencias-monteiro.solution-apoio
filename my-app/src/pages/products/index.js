@@ -2,163 +2,158 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  Modal,
-  TextInput,
-  TouchableOpacity,
   StyleSheet,
-  Image,
+  FlatList,
   ScrollView,
-  KeyboardAvoidingView,
-  Platform
+  TouchableOpacity,
 } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../theme';
+import ProductItem from '../../components/product-item';
+import Header from '../../components/header';
+import { colors, metrics } from '../../theme';
 
-export default function ModalAddProduct({ visible, onClose, onSave }) {
-  const [name, setName] = useState('');
-  const [category, setCategory] = useState('');
-  const [stock, setStock] = useState('');
-  const [price, setPrice] = useState('');
-  const [imageUri, setImageUri] = useState(null);
+// categorias mockadas
+const CATEGORIES = [
+  { id: 0, label: 'Todos' },
+  { id: 1, label: 'Categoria A' },
+  { id: 2, label: 'Categoria B' },
+  { id: 3, label: 'Categoria C' },
+];
 
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 1,
-    });
+// produtos mockados
+const PRODUCTS = [
+  {
+    id: 1,
+    nome: 'Produto 1',
+    categoria_id: 1,
+    stock: 12,
+    price: 9.99,
+    codigoBarra: '123456789',
+    imagem: null,
+    categoria: 'Categoria A',
+  },
+  {
+    id: 2,
+    nome: 'Produto 2',
+    categoria_id: 2,
+    stock: 0, // não aparece
+    price: 19.99,
+    codigoBarra: '987654321',
+    imagem: null,
+    categoria: 'Categoria B',
+  },
+  {
+    id: 3,
+    nome: 'Produto 3',
+    categoria_id: 3,
+    stock: 7,
+    price: 5.99,
+    codigoBarra: '321654987',
+    imagem: null,
+    categoria: 'Categoria C',
+  },
+];
 
-    if (!result.canceled) setImageUri(result.assets[0].uri);
-  };
+export default function Products() {
+  const [selectedCategory, setSelectedCategory] = useState(0);
 
-  const handleSave = () => {
-    if (!name || !category || !stock || !price) {
-      alert('Please fill all fields');
-      return;
-    }
-
-    onSave({
-      name,
-      category,
-      stock,
-      price,
-      imageUri,
-    });
-
-    // Reset form
-    setName('');
-    setCategory('');
-    setStock('');
-    setPrice('');
-    setImageUri(null);
-    onClose();
-  };
+  // Filtra produtos por categoria e que tenham stock > 0
+  const filteredProducts = PRODUCTS.filter(p => 
+    p.stock > 0 && (selectedCategory === 0 || p.categoria_id === selectedCategory)
+  );
 
   return (
-    <Modal
-      animationType="slide"
-      visible={visible}
-      onRequestClose={onClose}
-      presentationStyle="fullScreen"
-    >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.container}
+    <View style={styles.container}>
+      <Header title="Produtos" subtitle="Produtos disponíveis em stock" />
+
+      {/* Categorias */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.categoryBar}
+        contentContainerStyle={styles.categoryContent}
       >
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <Text style={styles.title}>Adicionar Produto</Text>
-
-          {/* Image Picker */}
-          <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
-            {imageUri ? (
-              <Image source={{ uri: imageUri }} style={styles.image} />
-            ) : (
-              <Ionicons name="image-outline" size={50} color={colors.grayMedium} />
-            )}
-            <Text style={styles.imageText}>Escolher Imagem</Text>
+        {CATEGORIES.map(cat => (
+          <TouchableOpacity
+            key={cat.id}
+            style={[
+              styles.categoryButton,
+              selectedCategory === cat.id && styles.categoryButtonActive,
+            ]}
+            onPress={() => setSelectedCategory(cat.id)}
+          >
+            <Text
+              style={[
+                styles.categoryText,
+                selectedCategory === cat.id && styles.categoryTextActive,
+              ]}
+              numberOfLines={1}
+            >
+              {cat.label}
+            </Text>
           </TouchableOpacity>
+        ))}
+      </ScrollView>
 
-          {/* Input Fields */}
-          <TextInput
-            placeholder="Nome do Produto"
-            style={styles.input}
-            value={name}
-            onChangeText={setName}
+      {/* Lista de produtos */}
+      <FlatList
+        data={filteredProducts}
+        keyExtractor={item => String(item.id)}
+        style={{ marginTop: 10 }}
+        contentContainerStyle={{ paddingBottom: 100 }}
+        renderItem={({ item }) => (
+          <ProductItem
+            name={item.nome}
+            category={item.categoria}
+            stock={item.stock}
+            price={item.price}
+            barcode={item.codigoBarra}
+            image={item.imagem}
           />
-          <TextInput
-            placeholder="Categoria"
-            style={styles.input}
-            value={category}
-            onChangeText={setCategory}
-          />
-          <TextInput
-            placeholder="Stock"
-            style={styles.input}
-            value={stock}
-            onChangeText={setStock}
-            keyboardType="numeric"
-          />
-          <TextInput
-            placeholder="Preço"
-            style={styles.input}
-            value={price}
-            onChangeText={setPrice}
-            keyboardType="numeric"
-          />
-
-          {/* Buttons */}
-          <View style={styles.buttons}>
-            <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-              <Text style={styles.saveText}>Salvar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-              <Text style={styles.cancelText}>Cancelar</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </Modal>
+        )}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.white },
-  scrollContainer: { padding: 20 },
-  title: { fontSize: 24, fontWeight: 'bold', marginBottom: 20, color: colors.primary },
-  imagePicker: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  image: { width: 120, height: 120, borderRadius: 10, marginBottom: 10 },
-  imageText: { color: colors.grayDark, marginTop: 5 },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.grayMedium,
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 15,
-    fontSize: 16,
-  },
-  buttons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  saveButton: {
+  container: {
     flex: 1,
-    backgroundColor: colors.success,
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginRight: 5,
+    paddingTop: metrics.statusBarHeight + 10,
+    backgroundColor: colors.background,
+    paddingHorizontal: metrics.basePadding,
   },
-  saveText: { color: colors.white, fontWeight: 'bold' },
-  cancelButton: {
-    flex: 1,
-    backgroundColor: colors.danger,
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginLeft: 5,
+
+  categoryBar: {
+    height: 40, // barra compacta
   },
-  cancelText: { color: colors.white, fontWeight: 'bold' },
+
+  categoryContent: {
+    alignItems: 'center',
+    paddingLeft: 2,
+    paddingRight: 8,
+  },
+
+  categoryButton: {
+    width: 90,
+    height: 32,
+    backgroundColor: colors.grayLight,
+    borderRadius: 18,
+    marginRight: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  categoryButtonActive: {
+    backgroundColor: colors.primary,
+  },
+
+  categoryText: {
+    color: colors.grayDark,
+    fontSize: 13,
+    fontWeight: '500',
+  },
+
+  categoryTextActive: {
+    color: colors.white,
+  },
 });
