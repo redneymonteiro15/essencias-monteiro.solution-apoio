@@ -14,6 +14,7 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../../theme';
+import { stylesGlobal } from '../../styles/globalStyles';
 
 export default function ModalAddProduct({ visible, onClose, onSave }) {
   const [name, setName] = useState('');
@@ -62,7 +63,7 @@ export default function ModalAddProduct({ visible, onClose, onSave }) {
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.container}
+        style={stylesGlobal.container}
       >
         {/* X para fechar */}
         <TouchableOpacity style={styles.closeButton} onPress={onClose}>
@@ -126,8 +127,6 @@ export default function ModalAddProduct({ visible, onClose, onSave }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.white },
-
   closeButton: {
     position: 'absolute',
     top: 40,

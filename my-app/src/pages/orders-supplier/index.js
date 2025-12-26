@@ -11,12 +11,11 @@ import { Ionicons } from '@expo/vector-icons';
 
 import Header from '../../components/header';
 import ModalOrderDetails from '../../components/modal-order-details';
+import ModalAddSupplierOrder from '../../components/modal-add-supplier-order';
+
 import { colors, metrics } from '../../theme';
 
-// ==============================
-// MOCK de encomendas
-// (trocar depois por SELECT no SQLite)
-// ==============================
+// MOCK
 const MOCK_ORDERS = [
   {
     id: 101,
@@ -49,12 +48,12 @@ export default function OrdersSupplier() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
-  // Ordena por mais recente
-  const sortedOrders = MOCK_ORDERS.sort(
+  const [showAddModal, setShowAddModal] = useState(false);
+
+  const sortedOrders = [...MOCK_ORDERS].sort(
     (a, b) => new Date(b.data) - new Date(a.data)
   );
 
-  // Filtro de pesquisa por ID ou fornecedor
   const filteredOrders = sortedOrders.filter(order => {
     const text = search.toLowerCase();
 
@@ -71,18 +70,11 @@ export default function OrdersSupplier() {
 
   return (
     <View style={styles.container}>
-      
-      {/* ============================== */}
-      {/* HEADER */}
-      {/* ============================== */}
       <Header
         title="Fornecedores"
         subtitle="Gerencie as suas encomendas"
       />
 
-      {/* ============================== */}
-      {/* BARRA DE PESQUISA */}
-      {/* ============================== */}
       <View style={styles.searchBar}>
         <Ionicons name="search" size={20} color={colors.grayDark} />
         <TextInput
@@ -94,9 +86,6 @@ export default function OrdersSupplier() {
         />
       </View>
 
-      {/* ============================== */}
-      {/* LISTA DE ENCOMENDAS */}
-      {/* ============================== */}
       <FlatList
         data={filteredOrders}
         keyExtractor={(item) => String(item.id)}
@@ -132,23 +121,25 @@ export default function OrdersSupplier() {
         }}
       />
 
-      {/* ============================== */}
-      {/* BOTÃO FLUTUANTE */}
-      {/* ============================== */}
+      {/* BOTÃO ADICIONAR */}
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => alert('Abrir modal de adicionar encomenda')}
+        onPress={() => setShowAddModal(true)}
       >
         <Ionicons name="add" size={32} color="#fff" />
       </TouchableOpacity>
 
-      {/* ============================== */}
-      {/* MODAL DE DETALHES */}
-      {/* ============================== */}
+      {/* MODAL DETALHES */}
       <ModalOrderDetails
         visible={showModal}
         order={selectedOrder}
         onClose={() => setShowModal(false)}
+      />
+
+      {/* MODAL ADICIONAR ENCOMENDA */}
+      <ModalAddSupplierOrder
+        visible={showAddModal}
+        onClose={() => setShowAddModal(false)}
       />
     </View>
   );
@@ -162,7 +153,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: metrics.basePadding,
   },
 
-  // Barra de pesquisa
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -180,7 +170,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
 
-  // Cards de encomendas
   orderCard: {
     backgroundColor: colors.white,
     padding: 15,
@@ -212,7 +201,6 @@ const styles = StyleSheet.create({
     marginTop: 3,
   },
 
-  // Botão flutuante
   fab: {
     position: 'absolute',
     bottom: 25,

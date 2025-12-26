@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../../theme';
+import { stylesGlobal } from '../../styles/globalStyles';
 
 export default function ModalOrderDetails({ visible, onClose, order }) {
   if (!order) return null;
@@ -33,7 +34,7 @@ export default function ModalOrderDetails({ visible, onClose, order }) {
       presentationStyle="fullScreen"
       onRequestClose={onClose}
     >
-      <View style={styles.container}>
+      <View style={stylesGlobal.container}>
 
         {/* Header do modal */}
         <View style={styles.header}>
@@ -98,12 +99,7 @@ export default function ModalOrderDetails({ visible, onClose, order }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-    paddingHorizontal: 20,
-    paddingTop: 45,
-  },
+
 
   header: {
     flexDirection: 'row',

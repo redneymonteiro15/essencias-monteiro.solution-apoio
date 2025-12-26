@@ -1,19 +1,18 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../theme'; // 🔸 Importa o tema central
-
-// Páginas
+import { colors } from '../theme';
 import Home from '../pages/home';
 import Products from '../pages/products';
 import OrdersClient from '../pages/orders-client';
 import OrdersSupplier from '../pages/orders-supplier';
 import Catalog from '../pages/catalog';
+import { Platform } from 'react-native';
 
 const Tab = createBottomTabNavigator();
 
 export default function Routes() {
-  return (
+  return ( 
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
@@ -22,7 +21,7 @@ export default function Routes() {
         tabBarStyle: {
           backgroundColor: colors.secondary,
           borderTopColor: colors.border,
-          height: 60,
+          height: Platform.OS === 'android' ? 100 : 85,
           paddingBottom: 6,
         },
         tabBarIcon: ({ color, size }) => {
